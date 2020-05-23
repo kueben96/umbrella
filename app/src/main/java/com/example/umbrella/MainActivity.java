@@ -2,27 +2,24 @@ package com.example.umbrella;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class MainActivity extends AppCompatActivity{
-
-  private Button mSendData;
-  private Button loadHistory;
-  private Button loadVision;
-  private Button loadContact;
-  private TextView txtVision;
+public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
   //private FirebaseDatabase mRef;
   //private DatabaseReference
@@ -34,58 +31,46 @@ public class MainActivity extends AppCompatActivity{
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    //load widgets
-    int myBtnColor = Color.parseColor("#006837");
-    loadHistory = (Button) findViewById(R.id.btnLoadHistory);
-    loadVision = (Button) findViewById(R.id.btnLoadVision);
-    loadContact = (Button) findViewById(R.id.btnLoadContact);
-    txtVision = (TextView) findViewById(R.id.txtVision);
+    BottomNavigationView navigation = findViewById(R.id.navigation);
+    navigation.setOnNavigationItemSelectedListener(this);
 
-    loadContact.setBackgroundColor(myBtnColor);
-    loadHistory.setBackgroundColor(myBtnColor);
-    loadVision.setBackgroundColor(myBtnColor);
+    loadFragment(new HomeFragment());
 
+  }
 
-    mSendData = (Button) findViewById(R.id.btnLoadContact);
+  private boolean loadFragment(Fragment fragment){
+    if(fragment!=null){
 
+        getSupportFragmentManager()
+          .beginTransaction()
+          .replace(R.id.fragmen_container, fragment)
+          .commit();
 
-    //get a database reference
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    final DatabaseReference myRef;
-    myRef = database.getReference("company_info");
-
-    myRef.child("vision").addValueEventListener(new ValueEventListener() {
-      @Override
-      public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-        String vision = dataSnapshot.getValue(String.class);
-        txtVision.setText(vision);
-      }
-
-      @Override
-      public void onCancelled(@NonNull DatabaseError databaseError) {
-
-      }
-    });
+      return true;
+    }
+    return false;
+  }
 
 
+  @Override
+  public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-    loadContact.setOnClickListener(new View.OnClickListener(){
-      @Override
-      public void onClick(View v) {
-          DatabaseReference mRefChild = myRef.child("vision");
-        //String vision = dataSnapshot.getValue(String.class);
-        Log.d("tag","click");
-      }
-    });
+    Fragment fragment = null;
 
-    mSendData.setOnClickListener(new View.OnClickListener(){
-      public void onClick(View view){
-        DatabaseReference mRefChild = myRef.child("Name");
-        mRefChild.setValue("Anil");
-        Log.d("tag", "click");
-      }
-    });
-
-
+    switch (item.getItemId()){
+      case R.id.nav_home:
+        fragment = new HomeFragment();
+        break;
+      case R.id.nav_contact:
+        fragment = new ContactFragment();
+        break;
+      case R.id.nav_history:
+        fragment = new HistoryFragment();
+        break;
+      case  R.id.nav_vision:
+        fragment = new VisionFragment();
+        break;
+    }
+    return loadFragment(fragment);
   }
 }
